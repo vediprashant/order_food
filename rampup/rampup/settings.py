@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'There4U',
+    'accounts',
     'restaurant',
     'rest_framework'
 ]
@@ -78,8 +78,12 @@ WSGI_APPLICATION = 'rampup.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'rampup',
+        'USER': 'vedi',
+        'PASSWORD': 'jtg',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 

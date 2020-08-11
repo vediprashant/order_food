@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from rest_framework import routers
-from There4U import views
+from accounts import views
 from django.contrib import admin
 
 
