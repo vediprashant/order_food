@@ -24,6 +24,9 @@ class MyUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+    """
+    Model to store the details of all the users
+    """
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True) 
     city = models.CharField(max_length=30)
