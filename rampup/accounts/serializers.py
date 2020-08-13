@@ -9,9 +9,10 @@ class RegisterSerializer(serializers.ModelSerializer):
     """
     Serializer to handle signup of a user
     """
+    restaurants_owned = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
         model = User
-        fields = ('id', 'name', 'email', 'password', 'city', 'state', 'zipcode', 'balance')
+        fields = ('id', 'name', 'email', 'password', 'city', 'state', 'zipcode', 'balance', 'restaurants_owned')
         extra_kwargs = {'password': {'write_only': True, 'min_length': 8},
                         'balance': {'read_only': True}
         }
@@ -22,13 +23,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         return super(RegisterSerializer, self).create(validated_data)
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     """
     It handles all the get request
     """
     class Meta:
         model = User
-        fields = ['name', 'email', 'city', 'state', 'zipcode', 'balance']
+        fields = ['name', 'email', 'city', 'state', 'zipcode', 'balance', 'restaurants_owned']
 
 
 class LoginSerializer(serializers.Serializer):

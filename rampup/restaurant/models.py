@@ -9,7 +9,7 @@ class Restaurant(models.Model):
     """
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
-    owner_ids = models.ManyToManyField(User)
+    owner_ids = models.ManyToManyField(User, related_name='restaurants_owned')
 
 
 class ResFoodItem(models.Model):
