@@ -27,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,8 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'restaurant',
-    'rest_framework'
+    'rest_framework',
+    'rest_framework.authtoken'
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -69,6 +70,13 @@ TEMPLATES = [
         },
     },
 ]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
 
 WSGI_APPLICATION = 'rampup.wsgi.application'
 
@@ -76,11 +84,14 @@ WSGI_APPLICATION = 'rampup.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
+
+AUTH_USER_MODEL = 'accounts.User'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'rampup',
-        'USER': 'vedi',
+        'NAME': 'onlineorder',
+        'USER': 'pra',
         'PASSWORD': 'jtg',
         'HOST': '127.0.0.1',
         'PORT': '5432',
