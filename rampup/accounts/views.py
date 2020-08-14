@@ -3,20 +3,26 @@ from rest_framework import viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.authtoken.models import Token
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import (
+    TokenAuthentication, get_authorization_header, exceptions
+)
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+
 from .models import User
-from rest_framework.authentication import get_authorization_header, exceptions
-from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
+from restaurant.models import Restaurant, ResFoodItem, OrderedItem, Order
+from .serializers import (
+    UserSerializer, RegisterSerializer, LoginSerializer, 
+    RestaurantSerializer, RestaurantItemSerializer, OrderSerializer
+)
 
 class UserViewSet(viewsets.ModelViewSet):
     """
     View to handle all the request to user
     """
     """
-    Ads permission classes based on the request
+    Adds permission classes based on the request
     """
     def get_permissions(self):
         if self.action == 'create':
@@ -47,6 +53,7 @@ class LoginView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
         token, created = Token.objects.get_or_create(user=user)
+
         return Response({
             "user": UserSerializer(user, context=self.get_serializer_context()).data,
             "token": token.key
@@ -81,3 +88,29 @@ class LogoutView(APIView):
         token_object.delete()
 
         return Response(status=204)
+
+class RestaurantViewSet(viewsets.ModelViewSet):
+    """
+    To handles CRUD operation on resturants
+    """
+
+    queryset = Restaurant.objects.all()
+    serializer_class = RestaurantSerializer  
+
+
+class RestaurantItemViewSet(viewsets.ModelViewSet):
+    """
+    To handle items present in a restaurant
+    """
+    serializer_class = RestaurantItemSerializer
+    queryset = ResFoodItem.objects.all()
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    """
+    To handle the orders
+    """
+
+    serializer_class = OrderSerializer
+    queryset = Order.objects.all()
+    

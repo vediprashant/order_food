@@ -21,6 +21,9 @@ from django.contrib import admin
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
+router.register(r'restaurant', views.RestaurantViewSet)
+router.register(r'item', views.RestaurantItemViewSet)
+router.register(r'order', views.OrderViewSet, basename='Order')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),

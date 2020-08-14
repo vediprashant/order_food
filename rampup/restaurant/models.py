@@ -11,41 +11,59 @@ class Restaurant(models.Model):
     location = models.CharField(max_length=100)
     owner_ids = models.ManyToManyField(User, related_name='restaurants_owned')
 
+    def __str__(self):
+        return self.name
+
 
 class ResFoodItem(models.Model):
     """
     Model which represent the items that are present in restaurants
     """
+    res_id = models.ForeignKey(Restaurant, on_delete = models.CASCADE, related_name="items")
     name = models.CharField(max_length = 100)
     price = models.PositiveIntegerField()
     quantity = models.PositiveIntegerField()
-    res_id = models.ForeignKey(Restaurant, on_delete = models.CASCADE)
+    
+    def __str__(self):
+        return self.name
 
 
 class Order(models.Model):
     """
     Model to store the deatils of the orders placed by users
     """
+    PLACED = 'placed'
+    ACCEPTED = 'accepted'
+    REJECTED = 'rejected'
+    DISPATCHED = 'dispatched'
+    DELIVERED = 'delivered'
+    CANCELLED = 'cancelled'
+
+    STATUS_CHOICES = [
+        (PLACED, 'placed'),
+        (ACCEPTED, 'accepted'),
+        (REJECTED, 'rejected'),
+        (DISPATCHED, 'dispatched'),
+        (DELIVERED, 'delivered'),
+        (CANCELLED, 'cancelled')
+    ]
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     res_id = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
     time = models.DateTimeField(auto_now_add=True)
-    amount = models.IntegerField()
-    status_choices = [
-        ('placed', 'placed'),
-        ('accepted', 'accepted'),
-        ('rejected', 'rejected'),
-        ('dispatched', 'dispatched'),
-        ('delivered', 'delivered'),
-        ('cancelled', 'cancelled')
-    ]
-    status = models.CharField(max_length=10, choices = status_choices, default = 'placed')
+    amount = models.PositiveIntegerField()
+   
+    status = models.CharField(max_length=10, choices = STATUS_CHOICES, default = PLACED)
+
+    def __str__(self):
+        return self.status
 
 
-class Ordered_Item(models.Model):
+class OrderedItem(models.Model):
     """
     Model to store the items that were present in an order
     """
-    res_food_id = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
-    order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
-    amount = models.IntegerField()
-    quantity = models.IntegerField()
+    food_id = models.ForeignKey(ResFoodItem, on_delete=models.CASCADE)
+    order_id = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
+    amount = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField()
+
