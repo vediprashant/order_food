@@ -66,4 +66,3 @@ class OrderedItem(models.Model):
     order_id = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
     amount = models.PositiveIntegerField()
     quantity = models.PositiveIntegerField()
-
