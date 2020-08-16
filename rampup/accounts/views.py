@@ -16,7 +16,7 @@ from .models import User
 from restaurant.models import Restaurant, ResFoodItem, OrderedItem, Order
 from .serializers import (
     UserSerializer, RegisterSerializer, LoginSerializer, 
-    RestaurantSerializer, RestaurantItemSerializer, OrderSerializer
+    RestaurantSerializer, RestaurantItemSerializer, OrderSerializer, UsersOrderedSerializer
 )
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -116,7 +116,7 @@ class RestaurantItemViewSet(viewsets.ModelViewSet):
         if self.request.user not in restaurant_object.owner_ids.all():
             raise exceptions.AuthenticationFailed("Not an owner")
         return super().get_permissions()
-        
+
     def get_queryset(self):
         given_id = self.request.query_params.get('id')
         queryset = ResFoodItem.objects.filter(res_id=given_id)
@@ -137,3 +137,27 @@ class OrderViewSet(viewsets.ModelViewSet):
         queryset = Order.objects.filter(user_id=request.user)
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class UsersOrderedViewSet(viewsets.ModelViewSet):
+    """
+    To show all the users that have placed some order from restaurant
+    """
+    serializer_class = UsersOrderedSerializer
+    
+    def get_permissions(self):
+        self.permission_classes = [permissions.IsAuthenticated]
+        given_id = self.request.query_params.get('id')
+        if given_id is None:
+            raise exceptions.AuthenticationFailed("provide restaurant id with id as a parameter")
+        restaurant_object = Restaurant.objects.get(pk=given_id)
+        if self.request.user not in restaurant_object.owner_ids.all():
+            raise exceptions.AuthenticationFailed("Not an owner")
+        return super().get_permissions()
+
+    def get_queryset(self):
+        given_id = self.request.query_params.get('id')
+        queryset = Order.objects.filter(res_id=given_id).distinct('user_id')
+        # user_queryset = queryset.objects.order_by('user_id').distinct('user_id')
+        return queryset
+    

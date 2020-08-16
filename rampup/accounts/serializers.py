@@ -132,3 +132,11 @@ class OrderSerializer(serializers.ModelSerializer):
             ordered_item.save()
     
         return instance
+
+class UsersOrderedSerializer(serializers.ModelSerializer):
+    """
+    serializer to show users that ordered from a restaurant
+    """
+    class Meta:
+        model = Order
+        fields = ['user_id', ]

@@ -24,6 +24,7 @@ router.register(r'users', views.UserViewSet)
 router.register(r'restaurant', views.RestaurantViewSet)
 router.register(r'item', views.RestaurantItemViewSet, basename='ResFoodItem')
 router.register(r'order', views.OrderViewSet, basename='Order')
+router.register(r'reports', views.UsersOrderedViewSet, basename='Order')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
