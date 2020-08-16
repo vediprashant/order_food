@@ -15,19 +15,20 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from rest_framework import routers
-from accounts import views
+from accounts.views import LoginView, LogoutView, UserViewSet
+from restaurant.views import RestaurantViewSet, RestaurantItemViewSet, OrderViewSet
 from django.contrib import admin 
 
 
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'restaurant', views.RestaurantViewSet)
-router.register(r'item', views.RestaurantItemViewSet, basename='ResFoodItem')
-router.register(r'order', views.OrderViewSet, basename='Order')
+router.register(r'users', UserViewSet)
+router.register(r'restaurant', RestaurantViewSet)
+router.register(r'item', RestaurantItemViewSet, basename='ResFoodItem')
+router.register(r'order', OrderViewSet, basename='Order')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api/', include(router.urls)),
-    url(r'^login/', views.LoginView.as_view()),
-    url(r'^logout/', views.LogoutView.as_view()),
+    url(r'^login/', LoginView.as_view()),
+    url(r'^logout/', LogoutView.as_view()),
 ]

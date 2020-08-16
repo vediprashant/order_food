@@ -1,7 +1,10 @@
+from datetime import datetime
+
 from django.db import models
+
 from accounts.models import User
 
-from datetime import datetime
+
 
 class Restaurant(models.Model):
     """
@@ -51,7 +54,6 @@ class Order(models.Model):
     res_id = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
     time = models.DateTimeField(auto_now_add=True)
     amount = models.PositiveIntegerField()
-   
     status = models.CharField(max_length=10, choices = STATUS_CHOICES, default = PLACED)
 
     def __str__(self):

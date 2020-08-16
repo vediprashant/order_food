@@ -5,7 +5,7 @@ from django.db import models
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, name, password=None):
+    def create_user(self, email, name, password=None, **kwargs):
         """
         Creates and saves a user with given parameters
         """
@@ -20,8 +20,10 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, name, password):
-
+    def create_superuser(self, email, name, password, **kwargs):
+        """
+        Creates and saves a superuser with given credentials
+        """
         user = self.create_user(email,
             name=name,
             password=password
@@ -55,7 +57,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.name
-
 
     def __str__(self):
         return self.email
