@@ -18,6 +18,17 @@ from rest_framework import routers
 from django.conf.urls import url, include
 from django.contrib import admin 
 
+from accounts.views import LoginView, LogoutView
+from accounts.urls import accounts_router
+from restaurant.urls import restaurant_router
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^login/', LoginView.as_view()),
+    url(r'^logout/', LogoutView.as_view()),
+    url(r'^api/', include(accounts_router.urls)),
+    url(r'^api/', include(restaurant_router.urls))
+
+
+    
 ]

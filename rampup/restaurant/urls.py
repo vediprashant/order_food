@@ -4,7 +4,7 @@ from django.conf.urls import url, include
 
 from restaurant.views import RestaurantViewSet, RestaurantItemViewSet, OrderViewSet
 
-router = routers.DefaultRouter()
-router.register(r'restaurant', RestaurantViewSet)
-router.register(r'item', RestaurantItemViewSet, basename='ResFoodItem')
-router.register(r'order', OrderViewSet, basename='Order')
+restaurant_router = routers.DefaultRouter()
+restaurant_router.register(r'restaurant', RestaurantViewSet)
+restaurant_router.register(r'item', RestaurantItemViewSet, basename='ResFoodItem')
+restaurant_router.register(r'order', OrderViewSet, basename='Order')

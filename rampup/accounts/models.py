@@ -7,7 +7,6 @@ from const.constants import max_name_length, max_place_length
 from const.models import TimeStampModel
 
 
-
 class MyUserManager(BaseUserManager):
     def create_user(self, email, name, password=None, **kwargs):
         """

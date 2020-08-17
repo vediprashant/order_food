@@ -43,8 +43,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer   
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     # search_fields = ['restaurant_name', 'order_items.name', 'amount']
-    # ordering = ['restaurant_name', 'amount']
-    def list(self, request):
-        queryset = Order.objects.filter(user_id=request.user)
-        serializer = OrderSerializer(queryset, many=True)
-        return Response(serializer.data)
+    # ordering = ['restaurant_name', 'amount'
+    def get_queryset(self):
+        queryset = Order.objects.filter(user_id=self.request.user)
+        return queryset
+
