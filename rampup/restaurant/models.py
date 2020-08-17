@@ -3,8 +3,8 @@ from datetime import datetime
 from django.db import models
 
 from accounts.models import User
-from const.constants import max_name_length, max_place_length, PLACED, STATUS_CHOICES
-from const.models import TimeStampModel
+from common.constants import max_name_length, max_place_length, PLACED, STATUS_CHOICES
+from common.models import TimeStampModel
 
 
 class Restaurant(TimeStampModel):

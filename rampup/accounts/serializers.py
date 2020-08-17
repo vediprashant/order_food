@@ -5,19 +5,18 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 
 from .models import User
-from restaurant.models import Order, OrderedItem, ResFoodItem, Restaurant
+from restaurant.serializers import RestaurantsOwnedSerializer
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     """
     Serializer to handle signup of a user
     """
-    restaurants_owned = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
         model = User
-        fields = ('id', 'name', 'email', 'password', 'city', 'state', 'zipcode', 'balance', 'restaurants_owned')
+        fields = ('id', 'name', 'email', 'password', 'city', 'state', 'zipcode', 'balance')
         extra_kwargs = {'password': {'write_only': True, 'min_length': 8},
-                        'balance': {'read_only': True}
+                        'balance': {'read_only': True},
         }
 
     def create(self, validated_data):
@@ -30,9 +29,11 @@ class UserSerializer(serializers.ModelSerializer):
     """
     It handles all the get request
     """
+    restaurants_owned = RestaurantsOwnedSerializer(many=True)
     class Meta:
         model = User
         fields = ['name', 'email', 'city', 'state', 'zipcode', 'balance', 'restaurants_owned']
+        extra_kwargs = {'restaurants_owned': {'read_only': True}}
 
 
 class LoginSerializer(serializers.Serializer):

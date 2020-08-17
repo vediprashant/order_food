@@ -37,12 +37,11 @@ class UserViewSet(viewsets.ModelViewSet):
     Redirect towards the required serializer based on request
     """
     def get_serializer_class(self):
-        if self.request.method == 'POST':
+        if self.request.method == 'POST' or self.request.method == 'PUT':
             return RegisterSerializer
         else:
             return UserSerializer
     
-
 
 class LoginView(GenericAPIView):
     """

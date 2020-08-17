@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'restaurant',
-    'const',
+    'common',
     'rest_framework',
     'rest_framework.authtoken'
 ]

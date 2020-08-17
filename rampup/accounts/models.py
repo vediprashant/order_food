@@ -3,8 +3,8 @@ from django.contrib.auth.models import (
 )
 from django.db import models
 
-from const.constants import max_name_length, max_place_length
-from const.models import TimeStampModel
+from common.constants import max_name_length, max_place_length
+from common.models import TimeStampModel
 
 
 class MyUserManager(BaseUserManager):
