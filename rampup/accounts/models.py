@@ -4,7 +4,7 @@ from django.contrib.auth.models import (
 from django.db import models
 
 from common.constants import max_name_length, max_place_length
-from common.models import TimeStampModel
+from common import models as common_models
 
 
 class MyUserManager(BaseUserManager):
@@ -31,24 +31,22 @@ class MyUserManager(BaseUserManager):
         """
         user = self.create_user(email,
             name=name,
-            password=password
+            password=password,
+            is_staff = True,
+            is_superuser = True
         )
-
-        user.is_staff = True
-        user.is_superuser = True
-        user.save(using=self._db)
         return user
 
 
-class User(AbstractBaseUser, PermissionsMixin, TimeStampModel):
+class User(AbstractBaseUser, PermissionsMixin, common_models.TimeStampModel):
     """
     Model to store the details of all the users
     """
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=max_name_length)
     email = models.EmailField(unique=True) 
-    city = models.CharField(max_length=30)
-    state = models.CharField(max_length=30)
-    zipcode = models.CharField(max_length=30, blank=True)
+    city = models.CharField(max_length=max_place_length)
+    state = models.CharField(max_length=max_place_length)
+    zipcode = models.CharField(max_length=max_place_length, blank=True)
     balance = models.PositiveIntegerField(default=1000)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)

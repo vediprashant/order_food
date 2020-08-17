@@ -3,11 +3,9 @@ from rest_framework.authentication import exceptions, TokenAuthentication
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from restaurant.models import Restaurant, ResFoodItem, Order
-from restaurant.permissions import IsRestaurantOwner
-from restaurant.serializers import (
-    OrderSerializer, RestaurantItemSerializer, RestaurantSerializer, UsersOrderedSerializer
-)
+from restaurant import models as restaurant_models
+from restaurant import permissions as restaurant_permissions
+from restaurant import serializers as restaurant_serializers
 
 
 class RestaurantViewSet(viewsets.ModelViewSet):
@@ -15,20 +13,20 @@ class RestaurantViewSet(viewsets.ModelViewSet):
     To handles CRUD operation on resturants
     """
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Restaurant.objects.all()
-    serializer_class = RestaurantSerializer  
+    queryset = restaurant_models.Restaurant.objects.all()
+    serializer_class = restaurant_serializers.RestaurantSerializer  
 
 
 class RestaurantItemViewSet(viewsets.ModelViewSet):
     """
     To handle items present in a restaurant
     """
-    serializer_class = RestaurantItemSerializer
-    permission_classes = [permissions.IsAuthenticated, IsRestaurantOwner]
+    serializer_class = restaurant_serializers.RestaurantItemSerializer
+    permission_classes = [permissions.IsAuthenticated, restaurant_permissions.IsRestaurantOwner]
         
     def get_queryset(self):
         given_id = self.request.query_params.get('id')
-        queryset = ResFoodItem.objects.filter(res_id=given_id)
+        queryset = restaurant_models.ResFoodItem.objects.filter(res_id=given_id)
         return queryset
 
 
@@ -39,12 +37,12 @@ class OrderViewSet(viewsets.ModelViewSet):
     """
     permission_classes = [permissions.IsAuthenticated]
     
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer   
+    queryset = restaurant_models.Order.objects.all()
+    serializer_class = restaurant_serializers.OrderSerializer   
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['res_id__name', 'order_items__food_id__name']
     def get_queryset(self):
-        queryset = Order.objects.filter(user_id=self.request.user).order_by('res_id__name', 'amount')
+        queryset = restaurant_models.Order.objects.filter(user_id=self.request.user).order_by('res_id__name', 'amount')
         return queryset
 
 
@@ -52,19 +50,18 @@ class UsersOrderedViewSet(viewsets.ModelViewSet):
     """
     To show all the users that have placed some order from restaurant
     """
-    serializer_class = UsersOrderedSerializer
+    serializer_class = restaurant_serializers.UsersOrderedSerializer
     
     def get_permissions(self):
         self.permission_classes = [permissions.IsAuthenticated]
         given_id = self.request.query_params.get('id')
         if given_id is None:
             raise exceptions.AuthenticationFailed("provide restaurant id with id as a parameter")
-        restaurant_object = Restaurant.objects.get(pk=given_id)
+        restaurant_object = restaurant_models.Restaurant.objects.get(pk=given_id)
         if self.request.user not in restaurant_object.owner_ids.all():
             raise exceptions.AuthenticationFailed("Not an owner")
         return super().get_permissions()
 
     def get_queryset(self):
         given_id = self.request.query_params.get('id')
-        queryset = Order.objects.filter(res_id=given_id).distinct('user_id')
-        return queryset
+        return restaurant_models.Order.objects.filter(res_id=given_id).distinct('user_id')

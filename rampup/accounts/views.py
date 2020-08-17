@@ -10,11 +10,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 
-from accounts.models import User
-from accounts.permissions import IsOwner
-from accounts.serializers import (
-    LoginSerializer, RegisterSerializer, UserSerializer, 
-)
+from accounts import models as accounts_models
+from accounts import permissions as accounts_permissions
+from accounts import serializers as accounts_serializers
+
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -29,34 +28,34 @@ class UserViewSet(viewsets.ModelViewSet):
         elif self.action == 'list':
             self.permission_classes = [permissions.IsAdminUser]
         else:
-            self.permission_classes = [permissions.IsAuthenticated, IsOwner]
+            self.permission_classes = [permissions.IsAuthenticated, accounts_permissions.IsOwner]
         return super(UserViewSet, self).get_permissions()
  
-    queryset = User.objects.all()
+    queryset = accounts_models.User.objects.all()
     """
     Redirect towards the required serializer based on request
     """
     def get_serializer_class(self):
         if self.request.method == 'POST' or self.request.method == 'PUT':
-            return RegisterSerializer
+            return accounts_serializers.RegisterSerializer
         else:
-            return UserSerializer
+            return accounts_serializers.UserSerializer
     
 
 class LoginView(GenericAPIView):
     """
     It log's in a user and add a token
     """
-    serializer_class = LoginSerializer
+    serializer_class = accounts_serializers.LoginSerializer
     
     def post(self, request):
-        serializer = LoginSerializer(data=request.data)
+        serializer = accounts_serializers.LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
         token, created = Token.objects.get_or_create(user=user)
 
         return Response({
-            "user": UserSerializer(user, context=self.get_serializer_context()).data,
+            "user": accounts_serializers.UserSerializer(user, context=self.get_serializer_context()).data,
             "token": token.key
             })
 
@@ -66,26 +65,10 @@ class LogoutView(APIView):
     It deletes the token and logout user
     """
     authentication_classes = (TokenAuthentication, )
+    permission_classes = [permissions.IsAuthenticated]
    
     def post(self, request):
-        auth = get_authorization_header(request).split()
-        if not auth:
-            raise exceptions.AuthenticationFailed('Authenticate First')
-        if len(auth) == 1:
-            msg = ('Invalid token header. No credentials provided.')
-            raise exceptions.AuthenticationFailed(msg)
-        elif len(auth) > 2:
-            msg = ('Invalid token header. Token string should not contain spaces.')
-            raise exceptions.AuthenticationFailed(msg)
-
-        try:
-            token = auth[1].decode()
-        except UnicodeError:
-            msg = ('Invalid token header. Token string should not contain invalid characters.')
-            raise exceptions.AuthenticationFailed(msg)
-        token_object = Token.objects.filter(key=token)
-        if token_object:
-            token_object.delete()
-        else:
-            raise exceptions.AuthenticationFailed("Given Token not associated with the user")
+    
+        token_object = Token.objects.filter(user=request.user)
+        token_object.delete()
         return Response(status=204)

@@ -4,8 +4,8 @@ from rest_framework import exceptions
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 
-from .models import User
-from restaurant.serializers import RestaurantsOwnedSerializer
+from accounts import models as accounts_model
+from restaurant import serializers as restaurants_serializer
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -13,7 +13,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     Serializer to handle signup of a user
     """
     class Meta:
-        model = User
+        model = accounts_model.User
         fields = ('id', 'name', 'email', 'password', 'city', 'state', 'zipcode', 'balance')
         extra_kwargs = {'password': {'write_only': True, 'min_length': 8},
                         'balance': {'read_only': True},
@@ -29,9 +29,9 @@ class UserSerializer(serializers.ModelSerializer):
     """
     It handles all the get request
     """
-    restaurants_owned = RestaurantsOwnedSerializer(many=True)
+    restaurants_owned = restaurants_serializer.RestaurantsOwnedSerializer(many=True)
     class Meta:
-        model = User
+        model = accounts_model.User
         fields = ['name', 'email', 'city', 'state', 'zipcode', 'balance', 'restaurants_owned']
         extra_kwargs = {'restaurants_owned': {'read_only': True}}
 
@@ -48,7 +48,7 @@ class LoginSerializer(serializers.Serializer):
         password = data.get("password")
 
         if email and password:
-            user=User.objects.filter(email=email)
+            user = accounts_model.User.objects.filter(email=email)
             if user:
                 if user.check_password(password):
                     data["user"] = user

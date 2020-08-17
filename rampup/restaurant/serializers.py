@@ -1,6 +1,6 @@
 from rest_framework import exceptions, serializers
 
-from accounts.models import User
+from accounts import models as accounts_models
 from restaurant import models as restaurant_models
 
 
