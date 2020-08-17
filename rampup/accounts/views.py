@@ -4,19 +4,16 @@ from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import (
-    TokenAuthentication, get_authorization_header, exceptions
+    TokenAuthentication, get_authorization_header, exceptions, 
 )
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
-from rest_framework import mixins
 
-from .models import User
-from restaurant.models import Restaurant, ResFoodItem, OrderedItem, Order
-from .serializers import (
-    UserSerializer, RegisterSerializer, LoginSerializer, 
-    RestaurantSerializer, RestaurantItemSerializer, OrderSerializer, UsersOrderedSerializer
+from accounts.models import User
+from accounts.permissions import IsOwner
+from accounts.serializers import (
+    LoginSerializer, RegisterSerializer, UserSerializer, 
 )
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -29,8 +26,10 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == 'create':
             self.permission_classes = []
+        elif self.action == 'list':
+            self.permission_classes = [permissions.IsAdminUser]
         else:
-            self.permission_classes = [permissions.IsAuthenticated]
+            self.permission_classes = [permissions.IsAuthenticated, IsOwner]
         return super(UserViewSet, self).get_permissions()
  
     queryset = User.objects.all()
@@ -42,6 +41,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return RegisterSerializer
         else:
             return UserSerializer
+    
 
 
 class LoginView(GenericAPIView):
@@ -69,8 +69,6 @@ class LogoutView(APIView):
     authentication_classes = (TokenAuthentication, )
    
     def post(self, request):
-
-
         auth = get_authorization_header(request).split()
         if not auth:
             raise exceptions.AuthenticationFailed('Authenticate First')
@@ -86,78 +84,9 @@ class LogoutView(APIView):
         except UnicodeError:
             msg = ('Invalid token header. Token string should not contain invalid characters.')
             raise exceptions.AuthenticationFailed(msg)
-        token_object = Token.objects.get(key=token)
-        token_object.delete()
-
+        token_object = Token.objects.filter(key=token)
+        if token_object:
+            token_object.delete()
+        else:
+            raise exceptions.AuthenticationFailed("Given Token not associated with the user")
         return Response(status=204)
-
-
-class RestaurantViewSet(viewsets.ModelViewSet):
-    """
-    To handles CRUD operation on resturants
-    """
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Restaurant.objects.all()
-    serializer_class = RestaurantSerializer  
-
-
-class RestaurantItemViewSet(viewsets.ModelViewSet):
-    """
-    To handle items present in a restaurant
-    """
-    serializer_class = RestaurantItemSerializer
-    
-    def get_permissions(self):
-        self.permission_classes = [permissions.IsAuthenticated]
-        given_id = self.request.query_params.get('id')
-        if given_id is None:
-            raise exceptions.AuthenticationFailed("provide restaurant id with id as a parameter")
-        restaurant_object = Restaurant.objects.get(pk=given_id)
-        if self.request.user not in restaurant_object.owner_ids.all():
-            raise exceptions.AuthenticationFailed("Not an owner")
-        return super().get_permissions()
-
-    def get_queryset(self):
-        given_id = self.request.query_params.get('id')
-        queryset = ResFoodItem.objects.filter(res_id=given_id)
-        return queryset
-
-
-
-class OrderViewSet(viewsets.ModelViewSet):
-      
-    """
-    To handle the orders
-    """
-    permission_classes = [permissions.IsAuthenticated]
-    
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer   
-    def list(self, request):
-        queryset = Order.objects.filter(user_id=request.user)
-        serializer = OrderSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-
-class UsersOrderedViewSet(viewsets.ModelViewSet):
-    """
-    To show all the users that have placed some order from restaurant
-    """
-    serializer_class = UsersOrderedSerializer
-    
-    def get_permissions(self):
-        self.permission_classes = [permissions.IsAuthenticated]
-        given_id = self.request.query_params.get('id')
-        if given_id is None:
-            raise exceptions.AuthenticationFailed("provide restaurant id with id as a parameter")
-        restaurant_object = Restaurant.objects.get(pk=given_id)
-        if self.request.user not in restaurant_object.owner_ids.all():
-            raise exceptions.AuthenticationFailed("Not an owner")
-        return super().get_permissions()
-
-    def get_queryset(self):
-        given_id = self.request.query_params.get('id')
-        queryset = Order.objects.filter(res_id=given_id).distinct('user_id')
-        # user_queryset = queryset.objects.order_by('user_id').distinct('user_id')
-        return queryset
-    
