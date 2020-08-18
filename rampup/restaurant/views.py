@@ -28,7 +28,7 @@ class RestaurantItemViewSet(viewsets.ModelViewSet):
         
     def get_queryset(self):
         given_id = self.request.query_params.get('id')
-        queryset = restaurant_models.ResFoodItem.objects.filter(res_id=given_id)
+        queryset = restaurant_models.ResFoodItem.objects.filter(restaurant=given_id)
         return queryset
 
 
