@@ -1,5 +1,4 @@
-from rest_framework import serializers
-from rest_framework import exceptions
+from rest_framework import exceptions, serializers
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
@@ -24,6 +23,10 @@ class RegisterSerializer(serializers.ModelSerializer):
             validated_data['password'] = make_password(validated_data['password'])
         return super(RegisterSerializer, self).create(validated_data)
 
+    def update(self, instance, validated_data):
+        validated_data['password'] = make_password(validated_data['password'])
+        return super(RegisterSerializer,self).update(instance, validated_data)
+
 
 class UserSerializer(serializers.ModelSerializer):
     """
@@ -46,19 +49,11 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, data):
         email = data.get("email")
         password = data.get("password")
-
-        if email and password:
-            user = accounts_model.User.objects.filter(email=email)
-            if user:
-                if user.check_password(password):
-                    data["user"] = user
-                else:
-                    msg = "Password does not match!"
-                    raise exceptions.ValidationError(msg)
-            else:
-                msg = "Unable to login with given credentials."
-                raise exceptions.ValidationError(msg)
+        user = accounts_model.User.objects.filter(email=email).first()
+        if user and user.check_password(password):
+            data["user"] = user
         else:
-            msg = "Must provide username and password both."
+            msg = "Unable to login with given credentials."
             raise exceptions.ValidationError(msg)
+        
         return data

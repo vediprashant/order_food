@@ -2,29 +2,30 @@ from datetime import datetime
 
 from django.db import models
 
-from accounts.models import User
-from common.constants import max_name_length, max_place_length, PLACED, STATUS_CHOICES
-from common.models import TimeStampModel
+from accounts import models as accounts_models
+from common import (
+    constants as common_constants, models as common_models
+)
 
 
-class Restaurant(TimeStampModel):
+class Restaurant(common_models.TimeStampModel):
     """
     Model having details of the restaurants
     """
-    name = models.CharField(max_length=max_name_length)
-    location = models.CharField(max_length=max_name_length)
-    owner_ids = models.ManyToManyField(User, related_name='restaurants_owned')
+    name = models.CharField(max_length=common_constants.MAX_NAME_LENGTH)
+    location = models.CharField(max_length=common_constants.MAX_NAME_LENGTH)
+    owners = models.ManyToManyField(accounts_models.User, related_name='restaurants_owned')
 
     def __str__(self):
         return self.name
 
 
-class ResFoodItem(TimeStampModel):
+class ResFoodItem(common_models.TimeStampModel):
     """
     Model which represent the items that are present in restaurants
     """
-    res_id = models.ForeignKey(Restaurant, on_delete = models.CASCADE, related_name="items")
-    name = models.CharField(max_length=max_name_length)
+    restaurant = models.ForeignKey(Restaurant, on_delete = models.CASCADE, related_name="items")
+    name = models.CharField(max_length=common_constants.MAX_NAME_LENGTH)
     price = models.PositiveIntegerField()
     quantity = models.PositiveIntegerField()
     
@@ -32,27 +33,27 @@ class ResFoodItem(TimeStampModel):
         return self.name
 
 
-class Order(TimeStampModel):
+class Order(common_models.TimeStampModel):
     """
     Model to store the deatils of the orders placed by users
     """
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    res_id = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    user = models.ForeignKey(accounts_models.User, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField()
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PLACED)
+    status = models.CharField(max_length=10, choices=common_constants.STATUS_CHOICES, default=common_constants.PLACED)
 
     def __str__(self):
-        return str(self.res_id.name) + " " + str(self.amount)
+        return f"{self.restaurant.name} {self.amount}"
 
 
-class OrderedItem(TimeStampModel):
+class OrderedItem(common_models.TimeStampModel):
     """
     Model to store the items that were present in an order
     """
-    food_id = models.ForeignKey(ResFoodItem, on_delete=models.CASCADE)
-    order_id = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
+    food = models.ForeignKey(ResFoodItem, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
     amount = models.PositiveIntegerField()
     quantity = models.PositiveIntegerField()
 
     def __str__(self):
-        return str(self.food_id.name)
+        return str(self.food.name)

@@ -3,54 +3,44 @@ from django.contrib.auth.models import (
 )
 from django.db import models
 
-from common.constants import max_name_length, max_place_length
-from common import models as common_models
+from common import (
+    constants as common_constants, models as common_models,
+ )
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, name, password=None, **kwargs):
+    def create_user(self, **kwargs):
         """
         Creates and saves a user with given parameters
         """
         if not email:
             raise ValueError('user must have an email address')
 
-        user = self.model(
-            email = self.normalize_email(email),
-            name=name,
-        )
-        for key, value in kwargs.items():
-            setattr(user, key, value)
-        user.set_password(password)
+        user = self.model(**kwargs)
+        user.email = self.normalize_email(self.email)
+        user.set_password(self.password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, name, password):
+    def create_superuser(self, **kwargs):
         """
         Creates and saves a superuser with given credentials
         """
-        user = self.create_user(email,
-            name=name,
-            password=password,
-            is_staff = True,
-            is_superuser = True
-        )
-        return user
+        return self.create_user(**kwargs)
 
 
 class User(AbstractBaseUser, PermissionsMixin, common_models.TimeStampModel):
     """
     Model to store the details of all the users
     """
-    name = models.CharField(max_length=max_name_length)
+    name = models.CharField(max_length=common_constants.MAX_NAME_LENGTH)
     email = models.EmailField(unique=True) 
-    city = models.CharField(max_length=max_place_length)
-    state = models.CharField(max_length=max_place_length)
-    zipcode = models.CharField(max_length=max_place_length, blank=True)
+    city = models.CharField(max_length=common_constants.MAX_PLACE_LENGTH)
+    state = models.CharField(max_length=common_constants.MAX_PLACE_LENGTH)
+    zipcode = models.CharField(max_length=common_constants.MAX_PLACE_LENGTH, blank=True)
     balance = models.PositiveIntegerField(default=1000)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-
    
     USERNAME_FIELD = 'email'
 

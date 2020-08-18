@@ -3,9 +3,11 @@ from rest_framework.authentication import exceptions, TokenAuthentication
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from restaurant import models as restaurant_models
-from restaurant import permissions as restaurant_permissions
-from restaurant import serializers as restaurant_serializers
+from restaurant import (
+    models as restaurant_models, 
+    permissions as restaurant_permissions,
+    serializers as restaurant_serializers,
+)
 
 
 class RestaurantViewSet(viewsets.ModelViewSet):
@@ -40,9 +42,9 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = restaurant_models.Order.objects.all()
     serializer_class = restaurant_serializers.OrderSerializer   
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['res_id__name', 'order_items__food_id__name']
+    search_fields = ['restaurant__name', 'order_items__food__name']
     def get_queryset(self):
-        queryset = restaurant_models.Order.objects.filter(user_id=self.request.user).order_by('res_id__name', 'amount')
+        queryset = restaurant_models.Order.objects.filter(user=self.request.user).order_by('restaurant__name', 'amount')
         return queryset
 
 
@@ -65,3 +67,4 @@ class UsersOrderedViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         given_id = self.request.query_params.get('id')
         return restaurant_models.Order.objects.filter(res_id=given_id).distinct('user_id')
+

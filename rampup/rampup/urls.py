@@ -24,5 +24,5 @@ from restaurant.urls import restaurant_router
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include(accounts_router.urls)),
-    url(r'^onlineorder/', include(restaurant_router.urls))
+    url(r'^foodie/', include(restaurant_router.urls))
 ]
