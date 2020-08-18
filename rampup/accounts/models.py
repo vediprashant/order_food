@@ -1,5 +1,5 @@
 from django.contrib.auth.models import (
-    BaseUserManager, AbstractBaseUser, PermissionsMixin
+    BaseUserManager, AbstractBaseUser, PermissionsMixin,
 )
 from django.db import models
 
@@ -13,12 +13,9 @@ class MyUserManager(BaseUserManager):
         """
         Creates and saves a user with given parameters
         """
-        if not email:
-            raise ValueError('user must have an email address')
-
         user = self.model(**kwargs)
-        user.email = self.normalize_email(self.email)
-        user.set_password(self.password)
+        user.email = self.normalize_email(user.email)
+        user.set_password(user.password)
         user.save(using=self._db)
         return user
 
